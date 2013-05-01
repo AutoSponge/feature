@@ -6,10 +6,6 @@
             return pubsub.remove(topic, fn);
         };
     }
-    function publish() {
-        pubsub.publish.apply(pubsub, arguments);
-        return this;
-    }
     function apply(reciever, args) {
         return function (fn) {
             return fn.apply(reciever, args);
@@ -20,9 +16,6 @@
             this[prop].push(val);
             return this;
         };
-    }
-    function get(description) {
-        return Feature.cache[description];
     }
     function Feature(description) {
         if (!(this instanceof Feature)) {
@@ -65,7 +58,10 @@
 
     global.Feature = {
         create: Feature,
-        publish: publish
+        publish:  function () {
+            pubsub.publish.apply(pubsub, arguments);
+            return this;
+        }
     };
 }(this, Mediator()));
 
