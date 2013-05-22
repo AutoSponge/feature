@@ -17,7 +17,16 @@
             return this;
         };
     }
+    /**
+     * describe an application feature
+     * @param description
+     * @returns {Feature}
+     * @constructor
+     */
     function Feature(description) {
+        if (Feature.cache[description]) {
+            return Feature.cache[description];
+        }
         if (!(this instanceof Feature)) {
             return new Feature(description);
         }
@@ -28,7 +37,7 @@
         this.disable = noop;
         this.register();
     }
-    Feature.mung = function (prop, rename) {
+    Feature.alias = function (prop, rename) {
         this.prototype[rename] = this.prototype[prop];
         return this;
     };
@@ -53,31 +62,17 @@
             Feature.cache[this.description] = this;
         }
     };
-    Feature.mung("given", "and")
-        .mung("unless", "or");
+    Feature.alias("given", "and")
+        .alias("unless", "or");
 
     global.Feature = {
         create: Feature,
+        get: function (description) {
+            return Feature.cache && Feature.cache[description];
+        },
         publish:  function () {
             pubsub.publish.apply(pubsub, arguments);
             return this;
         }
     };
 }(this, Mediator()));
-
-Feature.create("run feature1 under the right conditions")
-    .given(function (data) {return typeof data === "number";})
-        .and(function (data) {return !!data;})
-    .when("feature1/start")
-    .then(function(a, b){
-        console.log("pass", a, b);
-    })
-    .unless(function (data) {return data === 1})
-        .or(function (data) {return data%2 === 0})
-    .until("feature1/stop");
- 
-Feature.publish("feature1/start", 3, 4)     //pass 3
-    .publish("feature1/start", 1)        //nothing
-    .publish("feature1/start", 2)        //nothing
-    .publish("feature1/stop")
-    .publish("feature1/start", 3)
