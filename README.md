@@ -1,5 +1,7 @@
-feature
+Feature
 =======
 
-* depends on https://github.com/ajacksified/Mediator.js
-* add html5 shims needed (every, some, forEach)
+A BDD syntax library.
+
+* depends on https://github.com/ajacksified/Mediator.js or similar mediator implementation
+* depends on html5 shims if needed (every, some, forEach)
