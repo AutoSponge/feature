@@ -1,23 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
-    <script src='../lib/modernizr.custom.76713.js'></script>
-    <script>
-        Modernizr.load([
-            {
-                load: 'https://raw.github.com/dtao/lazy.js/master/lazy.min.js'
-            },
-            {
-                load: 'https://raw.github.com/ajacksified/Mediator.js/master/mediator.min.js'
-            },
-            {
-                load: '../src/feature.js'
-            }
-        ]);
-    </script>
+    <meta charset="UTF-8">
+    <title>QUnit Test Suite</title>
+    <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.11.0.css">
+    <script src="http://code.jquery.com/qunit/qunit-1.11.0.js"></script>
+    <script src="../../Mediator.js/mediator.min.js"></script>
+    <script src="../src/feature.js"></script>
+    <script src="feature.test.js"></script>
 </head>
 <body>
-
+<div id="qunit"></div>
+<div id="qunit-fixture">test markup</div>
 </body>
 </html>

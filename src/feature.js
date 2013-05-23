@@ -1,9 +1,10 @@
 (function (global, pubsub) {
     "use strict";
     function noop() {}
-    function unsub(topic, fn) {  
+    function unsub(topic, fn) {
         return function () {
-            return pubsub.remove(topic, fn);
+            pubsub.remove(topic, fn);
+            return this;
         };
     }
     function apply(reciever, args) {
@@ -13,7 +14,9 @@
     }
     function pushProp(prop) {
         return function pushVal(val) {
-            this[prop].push(val);
+            if (val) {
+                this[prop].push(val);
+            }
             return this;
         };
     }
@@ -34,42 +37,103 @@
         this.start = [];
         this.stop = [];
         this.action = [];
-        this.disable = noop;
         this.register();
     }
+    /**
+     * aliases the method
+     * @param prop
+     * @param rename
+     * @static
+     * @returns {function}
+     */
     Feature.alias = function (prop, rename) {
         this.prototype[rename] = this.prototype[prop];
         return this;
     };
+    /**
+     * cache of registered features
+     * @type {{}}
+     */
     Feature.cache = {};
     Feature.prototype = {
+        /**
+         * @param fn [{function}]
+         */
         given: pushProp("start"),
+        /**
+         * @param fn [{function}]
+         */
         unless: pushProp("stop"),
+        /**
+         * @param fn [{function}]
+         */
         then: pushProp("action"),
+        /**
+         * the topic that will disable the feature's trigger
+         * @param topic {string}
+         * @returns {Object<Feature>}
+         */
         until: function (topic) {
             pubsub.subscribe(topic, this.disable);
             return this;
         },
+        /**
+         * the topic that will trigger the feature
+         * @param topic {string}
+         * @returns {Object<Feature>}
+         */
         when: function (topic) {
-            this.disable = unsub(topic, pubsub.subscribe(topic, this.fire, null, this).id);
+            this.disable = unsub(topic, pubsub.subscribe(topic, this.trigger, null, this).id);
             return this;
         },
-        fire: function () {
+        /**
+         * @returns {Object<Feature>}
+         */
+        trigger: function () {
             var fn = apply(this, arguments);
-            return this.start.every(fn) && !this.stop.some(fn) && this.action.forEach(fn);
+            this.start.every(fn) && !this.stop.some(fn) && this.action.forEach(fn);
+            return this;
         },
+        /**
+         * @returns {Object<Feature>}
+         */
+        disable: function () {
+            this.trigger = noop;
+            return this;
+        },
+        /**+
+         * register an instance to the cache
+         */
         register: function () {
             Feature.cache[this.description] = this;
         }
     };
+    /**
+     * @borrows given as and
+     */
     Feature.alias("given", "and")
+    /**
+     * @borrows unless as or
+     */
         .alias("unless", "or");
 
     global.Feature = {
+        /**
+         * @param description {string}
+         * @returns {Object<Feature>}
+         */
         create: Feature,
+        /**
+         * @param description
+         * @returns {Object<Feature>}
+         */
         get: function (description) {
             return Feature.cache && Feature.cache[description];
         },
+        /**
+         * @param topic {string}
+         * @returns {Feature}
+         */
         publish:  function () {
             pubsub.publish.apply(pubsub, arguments);
             return this;
