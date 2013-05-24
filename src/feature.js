@@ -58,14 +58,17 @@
     Feature.prototype = {
         /**
          * @param fn [{function}]
+         * @returns {Object<Feature>}
          */
         given: pushProp("start"),
         /**
          * @param fn [{function}]
+         * @returns {Object<Feature>}
          */
         unless: pushProp("stop"),
         /**
          * @param fn [{function}]
+         * @returns {Object<Feature>}
          */
         then: pushProp("action"),
         /**
